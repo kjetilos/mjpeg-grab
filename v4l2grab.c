@@ -189,7 +189,7 @@ static void imageProcess(const void* p)
 	unsigned char* src = (unsigned char*)p;
 	unsigned char* dst = malloc(width*height*3*sizeof(char));
 
-	YUV420toYUV444(width, height, src, dst);
+	YUV422toYUV444(width, height, src, dst);
 
 	// write jpeg
 	jpegWrite(dst);
@@ -671,13 +671,13 @@ static void deviceInit(void)
 	fmt.fmt.pix.width = width;
 	fmt.fmt.pix.height = height;
 	fmt.fmt.pix.field = V4L2_FIELD_INTERLACED;
-	fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_YUV420;
+	fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;
 
 	if (-1 == xioctl(fd, VIDIOC_S_FMT, &fmt))
 		errno_exit("VIDIOC_S_FMT");
 
-	if (fmt.fmt.pix.pixelformat != V4L2_PIX_FMT_YUV420) {
-		fprintf(stderr,"Libv4l didn't accept YUV420 format. Can't proceed.\n");
+	if (fmt.fmt.pix.pixelformat != V4L2_PIX_FMT_YUYV) {
+		fprintf(stderr,"Libv4l didn't accept YUYV (YUV 4:2:2) format. Can't proceed.\n");
 		exit(EXIT_FAILURE);
 	}
 

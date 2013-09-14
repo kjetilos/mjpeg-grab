@@ -18,6 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include <stdint.h>
+
 /**
 	Convert from YUV420 format to YUV444.
 
@@ -48,5 +50,35 @@ void YUV420toYUV444(int width, int height, unsigned char* src, unsigned char* ds
 			*tmp++ = *pv;
 		}
 	}
+}
+
+void YUV422toYUV444(int width, int height, unsigned char* src, unsigned char* dst)
+{
+	int i;
+
+	uint8_t y0;
+	uint8_t y1;
+	uint8_t cb;
+	uint8_t cr;
+
+	// In the source pictrue 4 bytes represent 2 pixels, so number of
+	// pixels is 2 * (width*height)
+	unsigned char* end = src + (width*height)*2;
+
+	while (src < end)
+	{
+		y0 = *src++;
+		cb = *src++;
+		y1 = *src++;
+		cr = *src++;
+
+		*dst++ = y0;
+		*dst++ = cb;
+		*dst++ = cr;
+		*dst++ = y1;
+		*dst++ = cb;
+		*dst++ = cr;
+	}
+
 }
 
