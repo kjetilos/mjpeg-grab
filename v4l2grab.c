@@ -129,11 +129,7 @@ static int frameRead(void)
  */
 static void mainLoop(void)
 {	
-	unsigned int count;
-	unsigned int numberOfTimeouts;
-
-	numberOfTimeouts = 0;
-	count = 30;
+	unsigned int count = 30;
 
 	if (single_frame) 
 		count = 1;
@@ -161,12 +157,7 @@ static void mainLoop(void)
 			}
 
 			if (0 == r) {
-				if (numberOfTimeouts <= 0) {
-					count++;
-				} else {
-					fprintf(stderr, "select timeout\n");
-					exit(EXIT_FAILURE);
-				}
+				count++;
 			}
 
 			if (frameRead())
@@ -272,12 +263,12 @@ static void deviceInit(void)
 	/* Note VIDIOC_S_FMT may change width and height. */
 	if (width != fmt.fmt.pix.width) {
 		width = fmt.fmt.pix.width;
-		fprintf(stderr,"Image width set to %i by device %s.\n", width, deviceName);
+		fprintf(stderr,"Image width set to %ui by device %s.\n", width, deviceName);
 	}
 
 	if (height != fmt.fmt.pix.height) {
 		height = fmt.fmt.pix.height;
-		fprintf(stderr,"Image height set to %i by device %s.\n", height, deviceName);
+		fprintf(stderr,"Image height set to %ui by device %s.\n", height, deviceName);
 	}
 	
 	CLEAR(frameint);
