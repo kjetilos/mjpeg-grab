@@ -1,6 +1,6 @@
 CFLAGS = -g -Wall -Wextra -pedantic -std=c99
 LDFLAGS = -lv4l2
-CC ?= gcc
+CC = gcc
 SOURCES := $(wildcard *.c)
 OBJECTS := $(addprefix .obj/,$(notdir $(SOURCES:.c=.o)))
 OBJECTS_PATH := .obj
