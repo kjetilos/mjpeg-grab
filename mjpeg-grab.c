@@ -160,10 +160,9 @@ static void deviceInit(void)
 	struct v4l2_crop crop;
 	struct v4l2_format fmt;
 	struct v4l2_streamparm frameint;
-	unsigned int min;
 
-	if (-1 == xioctl(fd, VIDIOC_QUERYCAP, &cap)) {
-		if (EINVAL == errno) {
+	if (xioctl(fd, VIDIOC_QUERYCAP, &cap) == -1) {
+		if (errno == EINVAL) {
 			fprintf(stderr, "%s is no V4L2 device\n",deviceName);
 			exit(EXIT_FAILURE);
 		} else {
@@ -186,11 +185,11 @@ static void deviceInit(void)
 
 	cropcap.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
-	if (0 == xioctl(fd, VIDIOC_CROPCAP, &cropcap)) {
+	if (xioctl(fd, VIDIOC_CROPCAP, &cropcap) == 0) {
 		crop.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		crop.c = cropcap.defrect; /* reset to default */
 
-		if (-1 == xioctl(fd, VIDIOC_S_CROP, &crop)) {
+		if (xioctl(fd, VIDIOC_S_CROP, &crop) == -1) {
 			switch (errno) {
 				case EINVAL:
 					/* Cropping not supported. */
@@ -213,23 +212,12 @@ static void deviceInit(void)
 	fmt.fmt.pix.field = V4L2_FIELD_INTERLACED;
 	fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_MJPEG;
 
-	if (-1 == xioctl(fd, VIDIOC_S_FMT, &fmt))
+	if (xioctl(fd, VIDIOC_S_FMT, &fmt) == -1)
 		errno_exit("VIDIOC_S_FMT");
 
 	if (fmt.fmt.pix.pixelformat != V4L2_PIX_FMT_MJPEG) {
 		fprintf(stderr,"Libv4l didn't accept MJPEG format. Can't proceed.\n");
 		exit(EXIT_FAILURE);
-	}
-
-	/* Note VIDIOC_S_FMT may change width and height. */
-	if (width != fmt.fmt.pix.width) {
-		width = fmt.fmt.pix.width;
-		fprintf(stderr,"Image width set to %ui by device %s.\n", width, deviceName);
-	}
-
-	if (height != fmt.fmt.pix.height) {
-		height = fmt.fmt.pix.height;
-		fprintf(stderr,"Image height set to %ui by device %s.\n", height, deviceName);
 	}
 	
 	CLEAR(frameint);
@@ -238,23 +226,15 @@ static void deviceInit(void)
 	frameint.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 	frameint.parm.capture.timeperframe.numerator = 1;
 	frameint.parm.capture.timeperframe.denominator = fps;
-	if (-1 == xioctl(fd, VIDIOC_S_PARM, &frameint))
+	if (xioctl(fd, VIDIOC_S_PARM, &frameint) == -1)
 		fprintf(stderr,"Unable to set frame interval.\n");
-
-	/* Buggy driver paranoia. */
-	min = fmt.fmt.pix.width * 2;
-	if (fmt.fmt.pix.bytesperline < min)
-		fmt.fmt.pix.bytesperline = min;
-	min = fmt.fmt.pix.bytesperline * fmt.fmt.pix.height;
-	if (fmt.fmt.pix.sizeimage < min)
-		fmt.fmt.pix.sizeimage = min;
 
 	readInit(fmt.fmt.pix.sizeimage);
 }
 
 static void deviceClose(void)
 {
-	if (-1 == v4l2_close(fd))
+	if (v4l2_close(fd) == -1)
 		errno_exit("close");
 
 	fd = -1;
@@ -265,7 +245,7 @@ static void deviceOpen(void)
 	struct stat st;
 
 	// stat file
-	if (-1 == stat(deviceName, &st)) {
+	if (stat(deviceName, &st) == -1) {
 		fprintf(stderr, "Cannot identify '%s': %d, %s\n", deviceName, errno, strerror(errno));
 		exit(EXIT_FAILURE);
 	}
@@ -280,7 +260,7 @@ static void deviceOpen(void)
 	fd = v4l2_open(deviceName, O_RDWR /* required */ | O_NONBLOCK, 0);
 
 	// check if opening was successfull
-	if (-1 == fd) {
+	if (fd == -1) {
 		fprintf(stderr, "Cannot open '%s': %d, %s\n", deviceName, errno, strerror(errno));
 		exit(EXIT_FAILURE);
 	}
@@ -293,15 +273,15 @@ static void usage(FILE* fp, const char* name)
 		"Options:\n"
 		"-d | --device name   Video device name [/dev/video0]\n"
 		"-h | --help          Print this message\n"
-		"-o | --output        Set JPEG output filename\n"
+		"-o | --output        Set JPEG output filename [output.jpg]\n"
 		"-W | --width         Set image width\n"
 		"-H | --height        Set image height\n"
 		"-I | --interval      Set frame interval (fps)\n"
 		"-v | --version       Print version\n"
-		"-c | --count         Number of jpeg's to capture\n"
+		"-c | --count         Number of jpeg's to capture [1]\n"
 		"",
 		name);
-	}
+}
 
 static const char short_options [] = "d:ho:W:H:I:vc:";
 
