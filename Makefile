@@ -2,9 +2,9 @@ CFLAGS = -g -Wall -Wextra -pedantic -std=c99
 LDFLAGS = -lv4l2
 CC = gcc
 SOURCES := $(wildcard *.c)
-OBJECTS := $(addprefix .obj/,$(notdir $(SOURCES:.c=.o)))
+OBJECTS := $(addprefix .obj/,$(SOURCES:.c=.o))
 OBJECTS_PATH := .obj
-TARGET = v4l2grab
+TARGET = mjpeg-grab
 
 $(TARGET): $(OBJECTS)
 	$(CC) $(LDFLAGS) $< -o $@

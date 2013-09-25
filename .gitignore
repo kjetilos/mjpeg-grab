@@ -12,5 +12,5 @@ Makefile.in
 *~
 *.o
 *.cache
-v4l2grab
+mjpeg-grab
 stamp-h1

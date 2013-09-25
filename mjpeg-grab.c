@@ -33,8 +33,8 @@ static int fd = -1;
 struct buffer * buffers = NULL;
 
 // global settings
-static unsigned int width = 640;
-static unsigned int height = 480;
+static unsigned int width = 1280;
+static unsigned int height = 720;
 static unsigned int fps = 30;
 static char* jpegFilename = NULL;
 static char* deviceName = "/dev/video0";
