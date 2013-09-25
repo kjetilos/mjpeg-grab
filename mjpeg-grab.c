@@ -9,6 +9,7 @@
 #include <getopt.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <poll.h>
 #include <sys/stat.h>
 #include <linux/videodev2.h>
 #include <libv4l2.h>
@@ -116,37 +117,17 @@ static void mainLoop(void)
 	if (single_frame) 
 		count = 1;
 
-	while (count-- > 0) {
-		for (;;) {
-			fd_set fds;
-			struct timeval tv;
-			int r;
+	for (; count > 0; count--) {
+		struct pollfd pfd = {fd, POLLIN, 0};
+		int timeout = -1;
 
-			FD_ZERO(&fds);
-			FD_SET(fd, &fds);
+		int r = poll(&pfd, 1, timeout);
 
-			/* Timeout. */
-			tv.tv_sec = 1;
-			tv.tv_usec = 0;
+		if (r == -1)
+			errno_exit("poll");
 
-			r = select(fd + 1, &fds, NULL, NULL, &tv);
-
-			if (-1 == r) {
-				if (EINTR == errno)
-					continue;
-
-				errno_exit("select");
-			}
-
-			if (0 == r) {
-				count++;
-			}
-
-			if (frameRead())
-				break;
-
-			/* EAGAIN - continue select loop. */
-		}
+		if (r == 1)
+			frameRead();
 	}
 }
 

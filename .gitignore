@@ -14,3 +14,5 @@ Makefile.in
 *.cache
 mjpeg-grab
 stamp-h1
+*.jpg
+*.jpeg
