@@ -77,20 +77,9 @@ static void rawWrite(const unsigned char* img, size_t length)
 		errno_exit("raw write");
 	}
 
-	size_t size = length;
-	size_t i;
-	for (i=0; i<length; i++) 
-	{
-		if (img[i] == 0xff && img[i+1] == 0xd9)
-		{
-			size = i+2;
-			break;
-		}
-	}
-	fwrite(img, 1, size, outfile);
+	fwrite(img, 1, length, outfile);
 	fclose(outfile);
 }
-
 
 /**
  * process image read
@@ -105,7 +94,8 @@ static void imageProcess(const void* p, size_t length)
  */
 static int frameRead(void)
 {
-	if (-1 == v4l2_read(fd, buffers[0].start, buffers[0].length)) {
+	ssize_t n = v4l2_read(fd, buffers[0].start, buffers[0].length);
+	if (n == -1) {
 		switch (errno) {
 			case EAGAIN:
 				return 0;
@@ -119,7 +109,7 @@ static int frameRead(void)
 		}
 	}
 
-	imageProcess(buffers[0].start, buffers[0].length);
+	imageProcess(buffers[0].start, n);
 
 	return 1;
 }
