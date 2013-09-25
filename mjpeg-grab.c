@@ -29,7 +29,7 @@ struct buffer * buffers = NULL;
 static unsigned int width = 1280;
 static unsigned int height = 720;
 static unsigned int fps = 30;
-static char* jpegFilename = NULL;
+static char* jpegFilename = "output.jpg";
 static char* deviceName = "/dev/video0";
 static unsigned int frame_count = 1;
 
@@ -88,6 +88,7 @@ static void imageProcess(const void* p, size_t length)
 static int frameRead(void)
 {
 	ssize_t n = v4l2_read(fd, buffers[0].start, buffers[0].length);
+
 	if (n == -1) {
 		switch (errno) {
 			case EAGAIN:
@@ -114,7 +115,7 @@ static void mainLoop(void)
 {	
 	unsigned int count = frame_count;
 
-	for (; count > 0; count--) {
+	while (count > 0) {
 		struct pollfd pfd = {fd, POLLIN, 0};
 		int timeout = -1;
 
@@ -123,8 +124,8 @@ static void mainLoop(void)
 		if (r == -1)
 			errno_exit("poll");
 
-		if (r == 1)
-			frameRead();
+		if (frameRead())
+			count--;
 	}
 }
 
@@ -374,13 +375,6 @@ int main(int argc, char **argv)
 				usage(stderr, argv[0]);
 				exit(EXIT_FAILURE);
 		}
-	}
-
-	// check for need parameters
-	if (!jpegFilename) {
-		fprintf(stderr, "You have to specify JPEG output filename!\n\n");
-		usage(stdout, argv[0]);
-		exit(EXIT_FAILURE);
 	}
 
 	// open and initialize device
