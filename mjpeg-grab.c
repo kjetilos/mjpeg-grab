@@ -242,22 +242,8 @@ static void deviceClose(void)
 
 static void deviceOpen(void)
 {
-	struct stat st;
-
-	// stat file
-	if (stat(deviceName, &st) == -1) {
-		fprintf(stderr, "Cannot identify '%s': %d, %s\n", deviceName, errno, strerror(errno));
-		exit(EXIT_FAILURE);
-	}
-
-	// check if its device
-	if (!S_ISCHR(st.st_mode)) {
-		fprintf(stderr, "%s is no device\n", deviceName);
-		exit(EXIT_FAILURE);
-	}
-
 	// open device
-	fd = v4l2_open(deviceName, O_RDWR /* required */ | O_NONBLOCK, 0);
+	fd = v4l2_open(deviceName, O_RDWR | O_NONBLOCK, 0);
 
 	// check if opening was successfull
 	if (fd == -1) {
