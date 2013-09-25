@@ -31,7 +31,7 @@ static unsigned int height = 720;
 static unsigned int fps = 30;
 static char* jpegFilename = NULL;
 static char* deviceName = "/dev/video0";
-static bool single_frame = false;
+static unsigned int frame_count = 1;
 
 /**
  * Print error message and terminate programm with EXIT_FAILURE return code.
@@ -112,10 +112,7 @@ static int frameRead(void)
  */
 static void mainLoop(void)
 {	
-	unsigned int count = 30;
-
-	if (single_frame) 
-		count = 1;
+	unsigned int count = frame_count;
 
 	for (; count > 0; count--) {
 		struct pollfd pfd = {fd, POLLIN, 0};
@@ -300,12 +297,12 @@ static void usage(FILE* fp, const char* name)
 		"-H | --height        Set image height\n"
 		"-I | --interval      Set frame interval (fps)\n"
 		"-v | --version       Print version\n"
-		"-s | --single        Grab single frame\n"
+		"-c | --count         Number of jpeg's to capture\n"
 		"",
 		name);
 	}
 
-static const char short_options [] = "d:ho:W:H:I:vs";
+static const char short_options [] = "d:ho:W:H:I:vc:";
 
 static const struct option
 long_options [] = {
@@ -316,7 +313,7 @@ long_options [] = {
 	{ "height",   required_argument, NULL, 'H' },
 	{ "interval", required_argument, NULL, 'I' },
 	{ "version",	no_argument,		   NULL, 'v' },
-	{ "single",   no_argument,       NULL, 's' },
+	{ "count",    required_argument, NULL, 'c' },
 	{ 0, 0, 0, 0 }
 };
 
@@ -369,8 +366,8 @@ int main(int argc, char **argv)
 				exit(EXIT_SUCCESS);
 				break;
 
-			case 's':
-				single_frame = true;
+			case 'c':
+				frame_count = atoi(optarg);
 				break;
 
 			default:
