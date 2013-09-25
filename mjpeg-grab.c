@@ -274,27 +274,25 @@ static void usage(FILE* fp, const char* name)
 		"-d | --device name   Video device name [/dev/video0]\n"
 		"-h | --help          Print this message\n"
 		"-o | --output        Set JPEG output filename [output.jpg]\n"
-		"-W | --width         Set image width\n"
-		"-H | --height        Set image height\n"
-		"-I | --interval      Set frame interval (fps)\n"
+		"-r | --resolution    Set resolution i.e 1280x720\n"
+		"-i | --interval      Set frame interval (fps)\n"
 		"-v | --version       Print version\n"
 		"-c | --count         Number of jpeg's to capture [1]\n"
 		"",
 		name);
 }
 
-static const char short_options [] = "d:ho:W:H:I:vc:";
+static const char short_options [] = "d:ho:r:i:vc:";
 
 static const struct option
 long_options [] = {
-	{ "device",   required_argument, NULL, 'd' },
-	{ "help",     no_argument,       NULL, 'h' },
-	{ "output",   required_argument, NULL, 'o' },
-	{ "width",    required_argument, NULL, 'W' },
-	{ "height",   required_argument, NULL, 'H' },
-	{ "interval", required_argument, NULL, 'I' },
-	{ "version",	no_argument,		   NULL, 'v' },
-	{ "count",    required_argument, NULL, 'c' },
+	{ "device",     required_argument, NULL, 'd' },
+	{ "help",       no_argument,       NULL, 'h' },
+	{ "output",     required_argument, NULL, 'o' },
+	{ "resolution", required_argument, NULL, 'r' },
+	{ "interval",   required_argument, NULL, 'I' },
+	{ "version",	  no_argument,		   NULL, 'v' },
+	{ "count",      required_argument, NULL, 'c' },
 	{ 0, 0, 0, 0 }
 };
 
@@ -306,7 +304,7 @@ int main(int argc, char **argv)
 
 		c = getopt_long(argc, argv, short_options, long_options, &index);
 
-		if (-1 == c)
+		if (c == -1)
 			break;
 
 		switch (c) {
@@ -327,17 +325,15 @@ int main(int argc, char **argv)
 				jpegFilename = optarg;
 				break;
 
-			case 'W':
-				// set width
-				width = atoi(optarg);
+			case 'r':
+				if (sscanf(optarg, "%ux%u", &width, &height) != 2) {
+					fprintf(stderr, "Illegal resolution argument\n");
+					usage(stdout, argv[0]);
+					exit(EXIT_FAILURE);
+				}
 				break;
 
-			case 'H':
-				// set height
-				height = atoi(optarg);
-				break;
-				
-			case 'I':
+			case 'i':
 				// set fps
 				fps = atoi(optarg);
 				break;
@@ -367,8 +363,6 @@ int main(int argc, char **argv)
 	// close device
 	deviceUninit();
 	deviceClose();
-
-	exit(EXIT_SUCCESS);
 
 	return 0;
 }
