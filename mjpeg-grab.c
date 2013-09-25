@@ -20,12 +20,11 @@
 struct buffer {
   void * start;
   size_t length;
-};
+} buffer;
 
+
+// global state
 static int fd = -1;
-struct buffer * buffers = NULL;
-
-// global settings
 static unsigned int width = 1280;
 static unsigned int height = 720;
 static unsigned int fps = 30;
@@ -87,7 +86,7 @@ static void imageProcess(const void* p, size_t length)
  */
 static int frameRead(void)
 {
-	ssize_t n = v4l2_read(fd, buffers[0].start, buffers[0].length);
+	ssize_t n = v4l2_read(fd, buffer.start, buffer.length);
 
 	if (n == -1) {
 		switch (errno) {
@@ -103,7 +102,7 @@ static int frameRead(void)
 		}
 	}
 
-	imageProcess(buffers[0].start, n);
+	imageProcess(buffer.start, n);
 
 	return 1;
 }
@@ -131,23 +130,15 @@ static void mainLoop(void)
 
 static void deviceUninit(void)
 {
-	free(buffers[0].start);
-	free(buffers);
+	free(buffer.start);
 }
 
 static void readInit(unsigned int buffer_size)
 {
-	buffers = calloc(1, sizeof(*buffers));
+	buffer.length = buffer_size;
+	buffer.start = malloc(buffer_size);
 
-	if (!buffers) {
-		fprintf(stderr, "Out of memory\n");
-		exit(EXIT_FAILURE);
-	}
-
-	buffers[0].length = buffer_size;
-	buffers[0].start = malloc(buffer_size);
-
-	if (!buffers[0].start) {
+	if (!buffer.start) {
 		fprintf (stderr, "Out of memory\n");
 		exit(EXIT_FAILURE);
 	}
@@ -312,7 +303,7 @@ int main(int argc, char **argv)
 				break;
 
 			case 'r':
-				if (sscanf(optarg, "%ux%u", &width, &height) != 2) {
+				if (sscanf(optarg, "%4ux%4u", &width, &height) != 2) {
 					fprintf(stderr, "Illegal resolution argument\n");
 					usage(stdout, argv[0]);
 					exit(EXIT_FAILURE);
