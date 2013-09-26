@@ -305,6 +305,11 @@ int main(int argc, char **argv)
 		}
 	}
 
+	/* truncate output file, make ready for frames */
+	FILE* f = fopen(jpegFilename, "wb");
+	if (f)
+		fclose(f);
+
 	// open and initialize device
 	deviceOpen();
 	deviceInit();
