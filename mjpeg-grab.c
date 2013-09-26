@@ -15,7 +15,7 @@
 #include <libv4l2.h>
 
 #define CLEAR(x) memset (&(x), 0, sizeof (x))
-#define VERSION "3.0"
+#define VERSION "1.0"
 
 struct buffer {
   void * start;
