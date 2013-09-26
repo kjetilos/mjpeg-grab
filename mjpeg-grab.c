@@ -22,7 +22,6 @@ struct buffer {
   size_t length;
 } buffer;
 
-
 // global state
 static int fd = -1;
 static unsigned int width = 1280;
@@ -147,8 +146,6 @@ static void readInit(unsigned int buffer_size)
 static void deviceInit(void)
 {
 	struct v4l2_capability cap;
-	struct v4l2_cropcap cropcap;
-	struct v4l2_crop crop;
 	struct v4l2_format fmt;
 	struct v4l2_streamparm frameint;
 
@@ -172,28 +169,6 @@ static void deviceInit(void)
 	}
 
 	/* Select video input, video standard and tune here. */
-	CLEAR(cropcap);
-
-	cropcap.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-
-	if (xioctl(fd, VIDIOC_CROPCAP, &cropcap) == 0) {
-		crop.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-		crop.c = cropcap.defrect; /* reset to default */
-
-		if (xioctl(fd, VIDIOC_S_CROP, &crop) == -1) {
-			switch (errno) {
-				case EINVAL:
-					/* Cropping not supported. */
-					break;
-				default:
-					/* Errors ignored. */
-					break;
-			}
-		}
-	} else {
-		/* Errors ignored. */
-	}
-
 	CLEAR(fmt);
 
 	// v4l2_format
