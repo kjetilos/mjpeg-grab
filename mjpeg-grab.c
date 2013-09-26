@@ -65,7 +65,7 @@ static void rawWrite(const unsigned char* img, size_t length)
 	FILE *outfile = fopen( jpegFilename, "ab" );
 	if (!outfile)
 	{
-		errno_exit("raw write");
+		errno_exit("fopen");
 	}
 
 	fwrite(img, 1, length, outfile);
@@ -175,9 +175,9 @@ static void deviceInit(void)
 	fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 	fmt.fmt.pix.width = width;
 	fmt.fmt.pix.height = height;
-	fmt.fmt.pix.field = V4L2_FIELD_INTERLACED;
 	fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_MJPEG;
 
+	/* Set a video format for the v4l2 driver */
 	if (xioctl(fd, VIDIOC_S_FMT, &fmt) == -1)
 		errno_exit("VIDIOC_S_FMT");
 
